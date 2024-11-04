@@ -1,0 +1,82 @@
+-- question 1
+SELECT 
+    provider_name, 
+    provider_specialty 
+FROM 
+    providers;
+
+-- question 2
+SELECT 
+    p.patient_id, 
+    p.first_name, 
+    p.last_name, 
+    pr.provider_specialty 
+FROM 
+    patients p
+INNER JOIN 
+    visits v ON p.patient_id = v.patient_id
+INNER JOIN 
+    providers pr ON v.provider_id = pr.provider_id;
+
+-- question 3
+SELECT 
+    p.patient_id, 
+    p.first_name, 
+    p.last_name, 
+    v.date_of_visit 
+FROM 
+    patients p
+LEFT JOIN 
+    visits v ON p.patient_id = v.patient_id;
+
+-- question 4
+SELECT 
+    pr.provider_name, 
+    COUNT(v.visit_id) AS visit_count 
+FROM 
+    providers pr
+LEFT JOIN 
+    visits v ON pr.provider_id = v.provider_id
+GROUP BY 
+    pr.provider_name;
+
+-- question 5
+SELECT 
+    p.patient_id, 
+    p.first_name, 
+    p.last_name, 
+    a.admission_date, 
+    d.discharge_date 
+FROM 
+    patients p
+INNER JOIN 
+    visits v ON p.patient_id = v.patient_id
+INNER JOIN 
+    admissions a ON v.visit_id = a.visit_id
+INNER JOIN 
+    discharges d ON a.admission_id = d.admission_id
+WHERE 
+    v.requires_admission = 1;  -- assuming there is a flag indicating if admission is required
+
+-- Bonus Question
+SELECT 
+    p.first_name, 
+    p.last_name, 
+    p.date_of_birth, 
+    v.provider_name, 
+    v.visit_date, 
+    v.blood_pressure_systolic, 
+    v.blood_pressure_diastolic, 
+    v.visit_status 
+FROM 
+    patients p
+INNER JOIN 
+    visits v ON p.patient_id = v.patient_id
+INNER JOIN 
+    admissions a ON v.visit_id = a.visit_id
+INNER JOIN 
+    discharges d ON a.admission_id = d.admission_id
+WHERE 
+    d.discharge_disposition = 'Home'
+ORDER BY 
+    v.date_of_visit DESC;

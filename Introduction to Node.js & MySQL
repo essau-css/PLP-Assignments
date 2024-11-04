@@ -1,0 +1,154 @@
+CREATE TABLE Patients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    phone VARCHAR(15),
+    date_of_birth DATE,
+    gender ENUM('Male', 'Female', 'Other'),
+    address TEXT
+);
+
+
+CREATE TABLE Doctors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    specialization VARCHAR(100),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15),
+    schedule TEXT
+);
+
+CREATE TABLE Appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT,
+    doctor_id INT,
+    appointment_date DATE,
+    appointment_time TIME,
+    status ENUM('Scheduled', 'Completed', 'Canceled'),
+    FOREIGN KEY (patient_id) REFERENCES Patients(id),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(id)
+);
+
+CREATE TABLE Admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('Admin', 'SuperAdmin')
+);
+
+
+INSERT INTO Patients (first_name, last_name, email, password_hash, phone, date_of_birth, gender, address) VALUES 
+('John', 'Doe', 'john.doe@example.com', 'hashed_password', '1234567890', '1990-01-01', 'Male', '123 Main St');
+
+INSERT INTO Doctors (first_name, last_name, specialization, email, phone, schedule) VALUES 
+('Jane', 'Smith', 'Cardiology', 'jane.smith@example.com', '0987654321', 'Mon-Fri 9am-5pm');
+
+INSERT INTO Admin (username, password_hash, role) VALUES 
+('adminUser', 'admin_hashed_password', 'Admin');
+
+
+/telemedicine-app
+│
+├── /config
+│   └── db.js
+├── /controllers
+│   ├── appointmentController.js
+│   ├── doctorController.js
+│   └── patientController.js
+├── /models
+│   ├── appointmentModel.js
+│   ├── doctorModel.js
+│   └── patientModel.js
+├── /routes
+│   ├── appointmentRoutes.js
+│   ├── doctorRoutes.js
+│   └── patientRoutes.js
+├── /middleware
+│   └── authMiddleware.js
+├── /views
+│   └── index.html
+├── server.js
+└── package.json
+
+
+const express = require('express');
+const session = require('express-session');
+const mysql = require('mysql2/promise');
+
+const app = express();
+
+// Middleware setup
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: true,
+}));
+
+// Database connection
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'your_username',
+    password: 'your_password',
+    database: 'telemedicine_db'
+});
+
+// Routes
+app.use('/patients', require('./routes/patientRoutes'));
+app.use('/doctors', require('./routes/doctorRoutes'));
+app.use('/appointments', require('./routes/appointmentRoutes'));
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+
+
+const bcrypt = require('bcrypt');
+const { pool } = require('../config/db');
+
+app.post('/register', async (req, res) => {
+    const { first_name, last_name, email, password, phone, date_of_birth, gender, address } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    await pool.query('INSERT INTO Patients (first_name, last_name, email, password_hash, phone, date_of_birth, gender, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+                     [first_name, last_name, email, hashedPassword, phone, date_of_birth, gender, address]);
+    
+    res.status(201).send('Patient registered successfully');
+});
+
+
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    
+    const [user] = await pool.query('SELECT * FROM Patients WHERE email = ?', [email]);
+    
+    if (user.length > 0 && await bcrypt.compare(password, user[0].password_hash)) {
+        req.session.userId = user[0].id;
+        res.send('Login successful');
+    } else {
+        res.status(401).send('Invalid email or password');
+    }
+});
+
+
+
+app.post('/appointments', async (req, res) => {
+    const { patient_id, doctor_id, appointment_date, appointment_time } = req.body;
+    
+    await pool.query('INSERT INTO Appointments (patient_id, doctor_id, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?)', 
+                     [patient_id, doctor_id, appointment_date, appointment_time, 'Scheduled']);
+    
+    res.status(201).send('Appointment booked successfully');
+});
+
+
+
+

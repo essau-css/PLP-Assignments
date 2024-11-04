@@ -1,0 +1,21 @@
+import requests
+from django.shortcuts import render
+from .forms import CityForm
+
+def get_weather_data(city):
+    api_key = 'YOUR_API_KEY'  # Replace with your OpenWeatherMap API key
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+    response = requests.get(url)
+    return response.json()
+
+def weather_view(request):
+    weather_data = {}
+    form = CityForm()
+
+    if request.method == 'POST':
+        form = CityForm(request.POST)
+        if form.is_valid():
+            city = form.cleaned_data['city']
+            weather_data = get_weather_data(city)
+
+    return render(request, 'weather/weather.html', {'form': form, 'weather_data': weather_data})

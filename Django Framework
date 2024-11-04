@@ -1,0 +1,229 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+#Run the following commands to create the necessary database tables:
+python manage.py makemigrations
+python manage.py migrate
+
+#Create a User Registration Form: In tasks/forms.py, create a user registration form:
+
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+
+class UserRegisterForm(UserCreationForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+
+#Create a User Registration Form: In tasks/forms.py, create a user registration form:
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+
+class UserRegisterForm(UserCreationForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+#Create Views for Registration and Login: In tasks/views.py, add the following views:
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
+from .forms import UserRegisterForm
+from .models import Task
+
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('task-list')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'register.html', {'form': form})
+
+@login_required
+def task_list(request):
+    tasks = Task.objects.filter(user=request.user)
+    return render(request, 'task_list.html', {'tasks': tasks})
+#Set Up URLs: In tasks/urls.py, create URL patterns for registration and task management:
+from django.urls import path
+from .views import register, task_list
+
+urlpatterns = [
+    path('register/', register, name='register'),
+    path('tasks/', task_list, name='task-list'),
+]
+
+#Include the app's URLs in the project's urls.py:
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('tasks.urls')),
+]
+
+#Create a templates Directory: Inside the tasks app, create a templates directory and add HTML files.
+
+Register Template: Create a register.html file:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
+
+#Task List Template: Create a task_list.html file:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task List</title>
+</head>
+<body>
+    <h2>Your Tasks</h2>
+    <ul>
+        {% for task in tasks %}
+            <li>{{ task.title }} - {% if task.completed %} Completed {% else %} Not Completed {% endif %}</li>
+        {% empty %}
+            <li>No tasks available.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'register' %}">Register</a>
+</body>
+</html>
+
+#Create Views for Adding, Updating, and Deleting Tasks in tasks/views.py:
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .forms import TaskForm
+
+@login_required
+def add_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            return redirect('task-list')
+    else:
+        form = TaskForm()
+    return render(request, 'add_task.html', {'form': form})
+
+@login_required
+def update_task(request, pk):
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('task-list')
+    else:
+        form = TaskForm(instance=task)
+    return render(request, 'update_task.html', {'form': form})
+
+@login_required
+def delete_task(request, pk):
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('task-list')
+    return render(request, 'delete_task.html', {'task': task})
+
+#Create Forms for Tasks: In tasks/forms.py, add the following:
+from .models import Task
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'completed']
+
+#Set Up URLs for Task Management in tasks/urls.py:
+from .views import add_task, update_task, delete_task
+
+urlpatterns += [
+    path('tasks/add/', add_task, name='add-task'),
+    path('tasks/update/<int:pk>/', update_task, name='update-task'),
+    path('tasks/delete/<int:pk>/', delete_task, name='delete-task'),
+]
+
+#Create Templates for Adding, Updating, and Deleting Tasks:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Task</title>
+</head>
+<body>
+    <h2>Add Task</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Task</button>
+    </form>
+    <a href="{% url 'task-list' %}">Back to Task List</a>
+</body>
+</html>
+
+#update_task.html:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Task</title>
+</head>
+<body>
+    <h2>Update Task</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Update Task</button>
+    </form>
+    <a href="{% url 'task-list' %}">Back to Task List</a>
+</body>
+</html>
+
+#delete_task.html:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Task</title>
+</head>
+<body>
+    <h2>Delete Task</h2>
+    <p>Are you sure you want to delete "{{ task.title }}"?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Confirm Delete</button>
+    </form>
+    <a href="{% url 'task-list' %}">Cancel</a>
+</body>
+</html>
+
+#Run the Development Server
+Start the development server and test your application
+python manage.py runserver
+

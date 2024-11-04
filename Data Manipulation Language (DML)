@@ -1,0 +1,34 @@
+-- Part 1: INSERT Data
+-- question 1.1
+INSERT INTO patients (first_name, second_name, date_of_birth, gender, language)
+VALUES ('John', 'Doe', '1980-11-15', 'Male', 'English');
+
+-- Part 2: UPDATE Data
+-- question 2.1
+UPDATE patients
+SET language = 'Spanish'
+WHERE first_name = 'John' AND second_name = 'Doe';
+
+-- Part 3: DELETE Data
+-- question 3.1
+DELETE FROM patients
+WHERE patient_id = 10;
+
+-- Part 4: Handling NULL Values
+-- question 4.1
+SELECT name, 
+       COALESCE(email, 'N/A') AS email
+FROM providers;
+
+-- question 4.2
+SELECT name, 
+       COALESCE(phone_number, 'Missing details') AS phone_number, 
+       COALESCE(email, 'Missing details') AS email
+FROM providers;
+
+-- Bonus question (Optional)
+-- question 5.1
+SELECT *
+FROM providers
+WHERE speciality = 'Pediatrics' 
+  AND (phone_number IS NULL OR email IS NULL);

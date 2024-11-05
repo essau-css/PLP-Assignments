@@ -1,0 +1,46 @@
+void main() {
+  // Sample item prices in the shopping cart
+  List<double> itemPrices = [15.99, 7.50, 23.00, 9.99, 12.50, 5.00];
+
+  // Filtering out items below $10 using an anonymous function
+  List<double> filteredPrices = itemPrices.where((price) => price >= 10).toList();
+  print("Filtered item prices (above $10): $filteredPrices");
+
+  // Calculate total price with optional tax
+  double totalPrice = calculateTotal(filteredPrices, tax: 0.07); // 7% tax
+  print("Total price with tax: \$${totalPrice.toStringAsFixed(2)}");
+
+  // Applying discount of 20% to all items
+  double discountPercentage = 20.0;
+  List<double> discountedPrices = applyDiscount(filteredPrices, (price) {
+    return price - (price * (discountPercentage / 100));
+  });
+
+  // Calculate the final price after applying the discount
+  double finalPrice = calculateTotal(discountedPrices, tax: 0.07);
+  print("Final price after applying discount and tax: \$${finalPrice.toStringAsFixed(2)}");
+
+  // Calculate special discount based on the factorial of the number of items
+  double specialDiscount = calculateFactorialDiscount(filteredPrices.length);
+  double finalPriceAfterSpecialDiscount = finalPrice - (finalPrice * (specialDiscount / 100));
+  print("Final price after applying special factorial discount: \$${finalPriceAfterSpecialDiscount.toStringAsFixed(2)}");
+}
+
+// Function to calculate total price with optional tax
+double calculateTotal(List<double> prices, {double tax = 0.0}) {
+  double total = prices.fold(0, (sum, price) => sum + price);
+  return total + (total * tax);
+}
+
+// Higher-order function to apply a discount
+List<double> applyDiscount(List<double> prices, double Function(double) discountFunction) {
+  return prices.map(discountFunction).toList();
+}
+
+// Recursive function to calculate factorial discount
+double calculateFactorialDiscount(int n) {
+  if (n <= 1) {
+    return n.toDouble();
+  }
+  return n * calculateFactorialDiscount(n - 1);
+}

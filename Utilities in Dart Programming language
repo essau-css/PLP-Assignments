@@ -1,0 +1,76 @@
+import 'dart:io';
+import 'dart:convert';
+
+void main() {
+  // String Manipulation
+  print("Enter a string:");
+  String userInput = stdin.readLineSync() ?? "";
+
+  // String Manipulation Demonstration
+  String concatenated = userInput + " - Additional Text";
+  String interpolated = "You entered: $userInput";
+  String substring = userInput.length > 5 ? userInput.substring(0, 5) : userInput;
+  String upperCase = userInput.toUpperCase();
+  String lowerCase = userInput.toLowerCase();
+  String reversed = userInput.split('').reversed.join('');
+  int length = userInput.length;
+
+  // Display results
+  print("Concatenated: $concatenated");
+  print("Interpolated: $interpolated");
+  print("Substring: $substring");
+  print("Uppercase: $upperCase");
+  print("Lowercase: $lowerCase");
+  print("Reversed: $reversed");
+  print("Length: $length");
+
+  // Collections (Lists, Sets, Maps)
+  List<String> stringList = [];
+  Set<String> stringSet = {};
+  Map<String, String> stringMap = {};
+
+  // Adding items to the list
+  stringList.add(userInput);
+  stringList.add(concatenated);
+  print("List: $stringList");
+
+  // Adding items to the set
+  stringSet.add(userInput);
+  stringSet.add("Unique String");
+  print("Set: $stringSet");
+
+  // Adding items to the map
+  stringMap['original'] = userInput;
+  stringMap['reversed'] = reversed;
+  print("Map: $stringMap");
+
+  // File Handling
+  String filename = 'output.txt';
+  String logEntry = '$userInput, Reversed: $reversed, Length: $length, Date: ${DateTime.now()}';
+
+  // Write to file
+  File file = File(filename);
+  file.writeAsStringSync('$logEntry\n', mode: FileMode.append);
+  print("Data written to $filename");
+
+  // Read from file
+  try {
+    String contents = file.readAsStringSync();
+    print("File contents:\n$contents");
+  } catch (e) {
+    print("Error reading file: $e");
+  }
+
+  // Date and Time
+  DateTime now = DateTime.now();
+  DateTime futureDate = now.add(Duration(days: 10));
+  DateTime pastDate = now.subtract(Duration(days: 5));
+  
+  print("Current Date: ${now.toIso8601String()}");
+  print("Future Date (10 days later): ${futureDate.toIso8601String()}");
+  print("Past Date (5 days ago): ${pastDate.toIso8601String()}");
+
+  // Calculate difference between two dates
+  Duration difference = futureDate.difference(pastDate);
+  print("Difference in days: ${difference.inDays}");
+}

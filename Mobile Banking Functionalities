@@ -1,0 +1,177 @@
+TextField(
+  decoration: InputDecoration(
+    labelText: 'Recipient Name',
+    border: OutlineInputBorder(),
+  ),
+  controller: recipientController, // Use a TextEditingController
+),
+TextField(
+  decoration: InputDecoration(
+    labelText: 'Amount',
+    border: OutlineInputBorder(),
+  ),
+  keyboardType: TextInputType.number,
+  controller: amountController, // Use a TextEditingController
+),
+
+String selectedPaymentMethod = 'Credit Card'; // Default value
+DropdownButton<String>(
+  value: selectedPaymentMethod,
+  onChanged: (String? newValue) {
+    setState(() {
+      selectedPaymentMethod = newValue!;
+    });
+  },
+  items: <String>['Credit Card', 'PayPal', 'Bank Transfer']
+      .map<DropdownMenuItem<String>>((String value) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Text(value),
+    );
+  }).toList(),
+),
+
+bool isFavorite = false;
+SwitchListTile(
+  title: Text('Mark as Favorite'),
+  value: isFavorite,
+  onChanged: (bool value) {
+    setState(() {
+      isFavorite = value;
+    });
+  },
+),
+
+
+Column(
+  children: [
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(...), // Recipient's Name
+    ),
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(...), // Amount
+    ),
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: DropdownButton(...), // Payment Method
+    ),
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SwitchListTile(...), // Favorite
+    ),
+  ],
+),
+
+
+final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+void _validateForm() {
+  if (_formKey.currentState!.validate()) {
+    // Process the data
+  } else {
+    // Show error messages
+  }
+}
+
+// Inside the build method
+Form(
+  key: _formKey,
+  child: Column(
+    children: [
+      TextFormField(
+        controller: recipientController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a recipient name';
+          }
+          return null;
+        },
+      ),
+      TextFormField(
+        controller: amountController,
+        keyboardType: TextInputType.number,
+        validator: (value) {
+          if (value == null || double.tryParse(value) == null || double.parse(value) <= 0) {
+            return 'Please enter a positive amount';
+          }
+          return null;
+        },
+      ),
+      // Include DropdownButton and SwitchListTile here
+    ],
+  ),
+),
+
+
+PART 2
+class SendMoneyButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const SendMoneyButton({required this.label, required this.onPressed, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(label),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
+        textStyle: TextStyle(fontSize: 20),
+        primary: Colors.blue, // Example color
+        // Add other styling properties as needed
+      ),
+    );
+  }
+}
+
+
+MaterialApp(
+  theme: ThemeData(
+    primaryColor: Colors.blue,
+    textTheme: TextTheme(
+      bodyText1: TextStyle(color: Colors.black),
+      bodyText2: TextStyle(color: Colors.grey),
+    ),
+  ),
+  home: SendMoneyPage(),
+);
+
+class SuccessMessage extends StatelessWidget {
+  final bool visible;
+
+  SuccessMessage({required this.visible});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: visible ? 1.0 : 0.0,
+      duration: Duration(seconds: 1),
+      child: Text('Transaction Successful!', style: TextStyle(color: Colors.green)),
+    );
+  }
+}
+
+
+Navigator.of(context).push(PageRouteBuilder(
+  pageBuilder: (context, animation, secondaryAnimation) => DashboardPage(),
+  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    const begin = Offset(1.0, 0.0);
+    const end = Offset.zero;
+    const curve = Curves.easeInOut;
+
+    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    var offsetAnimation = animation.drive(tween);
+
+    return SlideTransition(
+      position: offsetAnimation,
+      child: child,
+    );
+  },
+));
+
+
+
+

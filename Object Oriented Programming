@@ -1,0 +1,131 @@
+class BankAccount {
+  // Private variable
+  String _accountNumber;
+  double _balance;
+
+  // Constructor
+  BankAccount(this._accountNumber, this._balance);
+
+  // Public method to deposit money
+  void deposit(double amount) {
+    if (amount > 0) {
+      _balance += amount;
+      print("Deposited: \$${amount}. New balance: \$${_balance}");
+    } else {
+      print("Deposit amount must be positive.");
+    }
+  }
+
+  // Public method to withdraw money
+  void withdraw(double amount) {
+    if (amount > 0 && amount <= _balance) {
+      _balance -= amount;
+      print("Withdrawn: \$${amount}. New balance: \$${_balance}");
+    } else {
+      print("Insufficient funds or invalid amount.");
+    }
+  }
+
+  // Public method to get the balance
+  double get balance => _balance;
+
+  // Public method to get account number (sensitive data access)
+  String get accountNumber => _accountNumber;
+}
+
+//Inheritance
+
+class SavingsAccount extends BankAccount {
+  double interestRate;
+
+  // Constructor
+  SavingsAccount(String accountNumber, double balance, this.interestRate)
+      : super(accountNumber, balance);
+
+  // Method to apply interest
+  void applyInterest() {
+    double interest = balance * interestRate;
+    deposit(interest); // Use the deposit method from the parent class
+    print("Applied interest: \$${interest}");
+  }
+}
+
+//Polymorphism
+
+class CheckingAccount extends BankAccount {
+  double overdraftLimit;
+
+  // Constructor
+  CheckingAccount(String accountNumber, double balance, this.overdraftLimit)
+      : super(accountNumber, balance);
+
+  @override
+  void withdraw(double amount) {
+    if (amount > 0 && amount <= (balance + overdraftLimit)) {
+      _balance -= amount;
+      print("Withdrawn: \$${amount}. New balance: \$${_balance}");
+    } else {
+      print("Overdraft limit exceeded or invalid amount.");
+    }
+  }
+}
+
+
+//Abstraction
+
+abstract class Account {
+  void deposit(double amount);
+  void withdraw(double amount);
+  double get balance; // Abstract method
+}
+
+class SavingsAccountAbstraction extends Account {
+  double _balance;
+
+  SavingsAccountAbstraction(this._balance);
+
+  @override
+  void deposit(double amount) {
+    if (amount > 0) {
+      _balance += amount;
+      print("Deposited: \$${amount}. New balance: \$${_balance}");
+    }
+  }
+
+  @override
+  void withdraw(double amount) {
+    if (amount > 0 && amount <= _balance) {
+      _balance -= amount;
+      print("Withdrawn: \$${amount}. New balance: \$${_balance}");
+    }
+  }
+
+  @override
+  double get balance => _balance;
+}
+
+
+//putting it all together
+void main() {
+  // Encapsulation
+  BankAccount myAccount = BankAccount("123456", 1000);
+  myAccount.deposit(500);
+  myAccount.withdraw(200);
+  print("Account Balance: \$${myAccount.balance}");
+
+  // Inheritance
+  SavingsAccount mySavings = SavingsAccount("654321", 2000, 0.05);
+  mySavings.applyInterest();
+  print("Savings Account Balance: \$${mySavings.balance}");
+
+  // Polymorphism
+  CheckingAccount myChecking = CheckingAccount("789012", 500, 200);
+  myChecking.withdraw(600); // Should allow withdrawal due to overdraft
+  print("Checking Account Balance: \$${myChecking.balance}");
+
+  // Abstraction
+  SavingsAccountAbstraction myAbstractSavings = SavingsAccountAbstraction(3000);
+  myAbstractSavings.deposit(150);
+  print("Abstract Savings Account Balance: \$${myAbstractSavings.balance}");
+}
+

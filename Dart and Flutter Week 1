@@ -1,0 +1,103 @@
+// 1. Define and Initialize Variables
+void main() {
+  int age = 25;
+  double height = 5.9;
+  String name = "Isaac";
+  bool isStudent = true;
+  List<int> numbers = [5, 12, 35, 150];
+
+  // 2. Type Conversion Functions
+  int stringToInt(String str) => int.parse(str);
+  double stringToDouble(String str) => double.parse(str);
+  String intToString(int num) => num.toString();
+  double intToDouble(int num) => num.toDouble();
+
+  // 3. Conversion and Display Function
+  void convertAndDisplay(String numberStr) {
+    int convertedInt = stringToInt(numberStr);
+    double convertedDouble = stringToDouble(numberStr);
+
+    print("Converted int: $convertedInt");
+    print("Converted double: $convertedDouble");
+  }
+
+  // Test convertAndDisplay with an example string
+  convertAndDisplay("42");
+
+  // 4. Control Flow
+
+  // If-Else Statement - Positive, Negative, or Zero Check
+  int number = -10;
+  if (number > 0) {
+    print("$number is positive.");
+  } else if (number < 0) {
+    print("$number is negative.");
+  } else {
+    print("$number is zero.");
+  }
+
+  // If-Else Statement - Voting Eligibility Check
+  if (age >= 18) {
+    print("Eligible to vote.");
+  } else {
+    print("Not eligible to vote.");
+  }
+
+  // Switch Case - Day of the Week
+  int day = 3; // For example, 3 represents Wednesday
+  switch (day) {
+    case 1:
+      print("Monday");
+      break;
+    case 2:
+      print("Tuesday");
+      break;
+    case 3:
+      print("Wednesday");
+      break;
+    case 4:
+      print("Thursday");
+      break;
+    case 5:
+      print("Friday");
+      break;
+    case 6:
+      print("Saturday");
+      break;
+    case 7:
+      print("Sunday");
+      break;
+    default:
+      print("Invalid day number.");
+  }
+
+  // Loops
+
+  // For Loop - Print numbers from 1 to 10
+  print("For loop from 1 to 10:");
+  for (int i = 1; i <= 10; i++) {
+    print(i);
+  }
+
+  // While Loop - Print numbers from 10 to 1
+  print("While loop from 10 to 1:");
+  int countdown = 10;
+  while (countdown >= 1) {
+    print(countdown);
+    countdown--;
+  }
+
+  // Do-While Loop - Print numbers from 1 to 5
+  print("Do-while loop from 1 to 5:");
+  int start = 1;
+  do {
+    print(start);
+    start++;
+  } while (start <= 5);
+
+  // Combining Data Types and Control Flow
+
+  // Complex Example with List of Integers
+  List<int> nums = [2, 15, 9, 102, 48, 7];
+  print("List processing:");
+  for (
